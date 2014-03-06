@@ -12,7 +12,7 @@ class DummyTags(object):
     def lookup_tag(self, tag):
         key = '%08X' % tag
         print "KEY: %s" % key
-        return self.tags.get(key, None)
+        return self.tags.get(key)
 
 # third party lib: http://docs.python-requests.org/en/latest/
 import requests
@@ -29,7 +29,7 @@ class DeploydTags(object):
         elif len(response) == 1:
             return response[0]
         else:
-            assert False, "Expected one response, got %d" % len(response)
-        
+            assert False, "Expected one tag in response, got %d: %s" % (len(response), response)
+
     def tag_url(self, tag):
         return '%s/?{"tag":%d}' % (self.base_url, tag)

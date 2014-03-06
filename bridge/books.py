@@ -52,4 +52,68 @@ class DummyBooks(object):
         self.db[isbn]['count'] += 1
         self.accounts[tag].remove(isbn)
 
-#class DeploydBooks
+import json
+import requests
+class DeploydBooks(object):
+    def __init__(self, base_url):
+        self.base_url = base_url.rstrip('/ ') # remove trailing slash (and spaces)
+
+    def lookup_book(self, isbn):
+        r = requests.get(self.isbn_url(isbn))
+        print r
+        response = r.json()
+        print response
+        if len(response) == 0:
+            return None
+        else:
+            del response[0]['borrower']
+            return response[0]
+
+    def borrow_or_return_book(self, tag, isbn):
+        r = requests.get(self.isbn_url(isbn))
+        books = r.json()
+        if r.status_code != 200:
+            print "Books request failed: %s - %s" % (r.status_code, books)
+            return 'F'
+
+        if not books:
+            print "Book with ISBN %s does not exist in the library" % isbn
+            return 'F'
+
+        borrowed_book = next((b for b in books if b.get('borrower') == tag), None)
+        if borrowed_book:
+            return self.return_book(borrowed_book['id'])
+        else:
+            free_books = [ b['id'] for b in books if b.get('borrower','') == '' ]
+            if len(free_books) == 0:
+                print "All books have been lent!: %s" % books
+                return 'F'
+            else:
+                return self.borrow_book(tag, free_books[0])
+        
+    def borrow_book(self, tag, book_id):
+        print "BORROW"
+        r = requests.put(self.book_url(book_id), data=json.dumps({u'borrower': tag}))
+        if r.status_code == 200:
+            print "Book borrowed!"
+            return 'B'
+        else:
+            print "Borrowing book failed: %s - %s" % (r.status_code, r.json())
+            return 'F'
+        
+    def return_book(self, book_id):
+        print "RETURN"
+        r = requests.put(self.book_url(book_id), data=json.dumps({u'borrower': ''}))
+        print r.json()
+        if r.status_code == 200:
+            print "Book returned!"
+            return 'R'
+        else:
+            print "Returning book failed: %s - %s" % (r.status_code, r.json())
+            return 'F'
+
+    def isbn_url(self, isbn):
+        return '%s/?isbn=%s' % (self.base_url, isbn)
+
+    def book_url(self, book_id):
+        return '%s/%s' % (self.base_url, book_id)
