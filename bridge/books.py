@@ -1,6 +1,6 @@
 import traceback, sys
 
-class DummyLibraryService(object):
+class DummyBooks(object):
     def __init__(self):
         self.db = {"1":
                    {"isbn": "1",
@@ -51,3 +51,5 @@ class DummyLibraryService(object):
 
         self.db[isbn]['count'] += 1
         self.accounts[tag].remove(isbn)
+
+#class DeploydBooks

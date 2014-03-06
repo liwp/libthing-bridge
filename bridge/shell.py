@@ -10,7 +10,7 @@ class LibThingShell(cmd.Cmd):
     prompt = "xbee% "
     file = None
     serial = serial.Serial(LIBTHING_PORT, 9600)
-    zigbee = ZigBee(serial)
+    zigbee = ZigBee(serial, escaped=True)
 
     def do_id(self, p):
         self.at_command('ID')
@@ -30,9 +30,7 @@ class LibThingShell(cmd.Cmd):
     def do_tag(self, arg):
         args = parse(arg)
         tag = int(args[0], 16)
-        print tag
-        print type(tag)
-        data = struct.pack('<cL', 'T', tag)
+        data = struct.pack('>cL', 'T', tag)
         self.send(data)
         self.recv()
 
@@ -103,7 +101,13 @@ class LibThingShell(cmd.Cmd):
             print "RX - failure"
         else:
             print "RX - unknown status code: %s" % status
-        
+
+    def cmdloop(self):
+        try:
+            cmd.Cmd.cmdloop(self)
+        except KeyboardInterrupt as e:
+            self.cmdloop()
+
 def parse(arg):
     'Convert a series of zero or more numbers to an argument tuple'
     return tuple(arg.split())

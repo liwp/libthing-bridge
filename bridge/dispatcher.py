@@ -6,8 +6,9 @@ class Dispatcher(object):
     def dispatch_tag_req(self, request):
         print "TAG REQ: %s" % request
         id =  self.id_service.lookup_tag(request['tag'])
+        print "TAG RSP: %s" % id
         return { 'type': 'tag_rsp',
-                 'id': id['first'] if id else None }
+                 'id': id['firstname'] if id else None }
 
     def dispatch_book_req(self, request):
         print "BOOK REQ: %s" % request
@@ -27,4 +28,3 @@ class Dispatcher(object):
             'book_req': self.dispatch_book_req,
             'lending_req': self.dispatch_lending_req,
         }[request['type']](request)
-

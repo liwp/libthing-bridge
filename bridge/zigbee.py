@@ -5,7 +5,7 @@ import serial
 class ZigBee(object):
     def __init__(self, serial_port, baud_rate, dispatcher, serializer):
         self.ser = serial.Serial(serial_port, baud_rate)
-        self.zb = xbee.ZigBee(self.ser)
+        self.zb = xbee.ZigBee(self.ser, escaped=True)
         self.dispatch = Dispatch(xbee = self.zb)
         self.dispatch.register('rx', self.rx_handler, lambda p: p['id'] == 'rx')
         self.dispatch.register('rx_explicit', self.default_handler, lambda p: p['id'] == 'rx_explicit')
@@ -35,6 +35,7 @@ class ZigBee(object):
         data = self.serializer.serialize_response(rsp)
         dst_long = packet['source_addr_long']
         dst_addr = packet['source_addr']
+        print packet
         self.zb.tx(dest_addr_long=dst_long, dest_addr=dst_addr, data=data)
 
     def run(self):

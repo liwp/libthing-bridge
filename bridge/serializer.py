@@ -11,13 +11,15 @@ class Serializer(object):
     def deserialize_request(self, req):
         code = req[0]
         payload = req[1:]
-        print code
-        print self.codes.keys()
+        print "REQUEST code: %s" % code
+        print "PAYLOAD: %s" % self.hex_dump(code)
+        print "PAYLOAD: %s" % self.hex_dump(payload)
+        
         if code in self.codes:
             return self.codes[code](payload)
 
     def deserialize_tag_request(self, req):
-        payload = struct.unpack('<L', req)
+        payload = struct.unpack('>L', req)
         return { 'type': 'tag_req',
                  'tag': payload[0] }
 
@@ -46,3 +48,7 @@ class Serializer(object):
 
     def serialize_lending_response(self, rsp):
         return struct.pack('<cc', 'L', rsp['result'])
+
+    def hex_dump(self, req):
+        return ':'.join(x.encode('hex') for x in req)
+    
