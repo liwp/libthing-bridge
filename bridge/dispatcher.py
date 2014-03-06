@@ -1,3 +1,4 @@
+import unicodedata
 class Dispatcher(object):
     def __init__(self, id_service, lib_service):
         self.id_service = id_service
@@ -7,8 +8,12 @@ class Dispatcher(object):
         print "TAG REQ: %s" % request
         id =  self.id_service.lookup_tag(request['tag'])
         print "TAG RSP: %s" % id
-        return { 'type': 'tag_rsp',
-                 'id': id['firstname'] if id else None }
+        if not id:
+            return { 'type': 'tag_rsp', 'id': None }
+
+        firstname = unicodedata.normalize('NFKD', id['firstname']).encode('ascii','ignore')
+        print "first name: %s" % firstname
+        return { 'type': 'tag_rsp', 'id': firstname }
 
     def dispatch_book_req(self, request):
         print "BOOK REQ: %s" % request

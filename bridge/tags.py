@@ -15,21 +15,21 @@ class DummyTags(object):
         return self.tags.get(key, None)
 
 # third party lib: http://docs.python-requests.org/en/latest/
-# import requests
-# class DeploydTags(object):
-#     def __init__(self, base_url):
-#         self.base_url = base_url
+import requests
+class DeploydTags(object):
+    def __init__(self, base_url):
+        self.base_url = base_url
 
-#     def lookup_tag(self, tag):
-#         r = requests.get(self.tag_url(tag))
-#         response = r.json()
+    def lookup_tag(self, tag):
+        r = requests.get(self.tag_url(tag))
+        response = r.json()
 
-#         if len(response) == 0:
-#             return None
-#         elif len(response) == 1:
-#             return response[0]
-#         else:
-#             assert False, "Expected one response, got %d" % len(response)
+        if len(response) == 0:
+            return None
+        elif len(response) == 1:
+            return response[0]
+        else:
+            assert False, "Expected one response, got %d" % len(response)
         
-#     def tag_url(self, tag):
-#         return '%s/?{"tag":%d}' % (self.base_url, tag)
+    def tag_url(self, tag):
+        return '%s/?{"tag":%d}' % (self.base_url, tag)
