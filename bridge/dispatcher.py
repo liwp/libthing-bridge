@@ -5,27 +5,36 @@ class Dispatcher(object):
         self.lib_service = lib_service
 
     def dispatch_tag_req(self, request):
-        print "TAG REQ: %s" % request
-        id =  self.id_service.lookup_tag(request['tag'])
-        print "TAG RSP: %s" % id
+        tag = request['tag']
+        print "TAG REQ - %s" % tag
+        id =  self.id_service.lookup_tag(tag)
         if not id:
+            print "TAG RSP - no such tag: %s" % tag
             return { 'type': 'tag_rsp', 'id': None }
 
         firstname = unicodedata.normalize('NFKD', id['firstname']).encode('ascii','ignore')
-        print "first name: %s" % firstname
+        print "TAG RSP - name: %s" % firstname
         return { 'type': 'tag_rsp', 'id': firstname }
 
     def dispatch_book_req(self, request):
-        print "BOOK REQ: %s" % request
-        book = self.lib_service.lookup_book(request['isbn'])
-        return { 'type': 'book_rsp',
-                 'title': book['title'] if book else None }
+        isbn = request['isbn']
+        print "BOOK REQ - %s" % isbn
+        book = self.lib_service.lookup_book(isbn)
+        if not book:
+            print "BOOK RSP - no such book: %s" % isbn
+            return { 'type': 'book_rsp', 'title': None }
+
+        title = unicodedata.normalize('NFKD', book['title']).encode('ascii','ignore')
+        print "BOOK RSP - book title: %s" % title
+        return { 'type': 'book_rsp', 'title': title }
     
     def dispatch_lending_req(self, request):
-        print "LENDING REQ: %s" % request
-        result = self.lib_service.borrow_or_return_book(request['tag'], request['isbn'])
-        return { 'type': 'lending_rsp',
-                 'result': result }
+        tag = request['tag']
+        isbn = request['isbn']
+        print "LENDING REQ - %s %s" % (tag, isbn)
+        result = self.lib_service.borrow_or_return_book(tag, isbn)
+        print "LENDING RSP - %s" % result
+        return { 'type': 'lending_rsp', 'result': result }
     
     def dispatch(self, request):
         return {

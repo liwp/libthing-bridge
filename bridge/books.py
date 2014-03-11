@@ -59,15 +59,17 @@ class DeploydBooks(object):
         self.base_url = base_url.rstrip('/ ') # remove trailing slash (and spaces)
 
     def lookup_book(self, isbn):
+        print self.isbn_url(isbn)
         r = requests.get(self.isbn_url(isbn))
-        print r
-        response = r.json()
-        print response
-        if len(response) == 0:
+        books = r.json()
+        print books
+        if len(books) == 0:
             return None
         else:
-            del response[0]['borrower']
-            return response[0]
+            book = books[0]
+            if 'borrower' in book:
+                del book['borrower']
+            return book
 
     def borrow_or_return_book(self, tag, isbn):
         r = requests.get(self.isbn_url(isbn))
@@ -80,7 +82,7 @@ class DeploydBooks(object):
             print "Book with ISBN %s does not exist in the library" % isbn
             return 'F'
 
-        borrowed_book = next((b for b in books if b.get('borrower') == tag), None)
+        borrowed_book = next((b for b in books if b.get('borrower') == str(tag)), None)
         if borrowed_book:
             return self.return_book(borrowed_book['id'])
         else:
@@ -93,12 +95,19 @@ class DeploydBooks(object):
         
     def borrow_book(self, tag, book_id):
         print "BORROW"
-        r = requests.put(self.book_url(book_id), data=json.dumps({u'borrower': tag}))
+        print tag
+        url = self.book_url(book_id)
+        data = json.dumps({u'borrower': str(tag)})
+        print url
+        print data
+        r = requests.put(url, data=data)
+        book = r.json()
         if r.status_code == 200:
             print "Book borrowed!"
+            print book
             return 'B'
         else:
-            print "Borrowing book failed: %s - %s" % (r.status_code, r.json())
+            print "Borrowing book failed: %s - %s" % (r.status_code, book)
             return 'F'
         
     def return_book(self, book_id):

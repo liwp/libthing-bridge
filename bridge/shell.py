@@ -37,16 +37,16 @@ class LibThingShell(cmd.Cmd):
     def do_book(self, arg):
         args = parse(arg)
         isbn = args[0]
-        data = struct.pack('<c128p', 'B', isbn)
+        data = struct.pack('>cL64p', 'B', 0, isbn)
         self.send(data)
         self.recv()
 
     def do_lend(self, arg):
         args = parse(arg)
         print args
-        tag = args[0].decode('hex')
+        tag = int(args[0], 16)
         isbn = args[1]
-        data = struct.pack('<cL128p', 'L', tag, isbn)
+        data = struct.pack('>cL64p', 'L', tag, isbn)
         self.send(data)
         self.recv()
 
@@ -78,14 +78,14 @@ class LibThingShell(cmd.Cmd):
          
     def recv_tag(self, data):
         print data
-        id = struct.unpack('<128p', data)[0]
+        id = struct.unpack('<64p', data)[0]
         if len(id) == 0:
             print "RX - unknown user"
         else:
             print "RX - user: %s" % id
          
     def recv_book(self, data):
-        title = struct.unpack('<128p', data)[0]
+        title = struct.unpack('<64p', data)[0]
         if len(title) == 0:
             print "RX - book does not exist"
         else:

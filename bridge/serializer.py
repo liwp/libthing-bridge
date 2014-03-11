@@ -11,8 +11,7 @@ class Serializer(object):
     def deserialize_request(self, req):
         code = req[0]
         payload = req[1:]
-        print "REQUEST code: %s" % code
-        print "PAYLOAD: %s" % self.hex_dump(code)
+        print "REQUEST code: %s" % self.hex_dump(code)
         print "PAYLOAD: %s" % self.hex_dump(payload)
         
         if code in self.codes:
@@ -24,12 +23,12 @@ class Serializer(object):
                  'tag': payload[0] }
 
     def deserialize_book_request(self, req):
-        payload =  struct.unpack('<128p', req)
+        payload =  struct.unpack('>L64p', req)
         return { 'type': 'book_req',
-                 'isbn': payload[0] }
+                 'isbn': payload[1] }
 
     def deserialize_lending_request(self, req):
-        payload =  struct.unpack('<L128p', req)
+        payload =  struct.unpack('>L64p', req)
         return { 'type': 'lending_req',
                  'tag': payload[0], 'isbn': payload[1] }
     
@@ -41,10 +40,10 @@ class Serializer(object):
         }[rsp['type']](rsp)
 
     def serialize_tag_response(self, rsp):
-        return struct.pack('<c128p', 'T', rsp['id'] or '')
+        return struct.pack('<c64p', 'T', rsp['id'] or '')
 
     def serialize_book_response(self, rsp):
-        return struct.pack('<c128p', 'B', rsp['title'] or '')
+        return struct.pack('<c64p', 'B', rsp['title'] or '')
 
     def serialize_lending_response(self, rsp):
         return struct.pack('<cc', 'L', rsp['result'])
